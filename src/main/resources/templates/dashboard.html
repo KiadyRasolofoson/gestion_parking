@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Tableau de bord')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Tableau de bord</h1>
+                <p>Occupation en temps reel, entrees du jour et recettes.</p>
+            </div>
+            <div sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')">
+                <a class="btn primary" th:href="@{/sessions/entry}">Nouvelle entree</a>
+                <a class="btn" th:href="@{/sessions/exit}">Enregistrer une sortie</a>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="kpi-grid">
+            <div class="kpi">
+                <div class="label">Places totales</div>
+                <div class="value" th:text="${stats.totalSpaces()}">0</div>
+                <div class="hint" th:text="${stats.outOfServiceSpaces()} + ' hors service'">0 hors service</div>
+            </div>
+            <div class="kpi free">
+                <div class="label">Places libres</div>
+                <div class="value" th:text="${stats.freeSpaces()}">0</div>
+            </div>
+            <div class="kpi occupied">
+                <div class="label">Places occupees</div>
+                <div class="value" th:text="${stats.occupiedSpaces()}">0</div>
+                <div class="hint" th:text="'Taux ' + ${stats.occupancyRate()} + ' %'">Taux 0 %</div>
+            </div>
+            <div class="kpi reserved">
+                <div class="label">Places reservees</div>
+                <div class="value" th:text="${stats.reservedSpaces()}">0</div>
+                <div class="hint" th:text="${stats.activeReservations()} + ' reservation(s) confirmee(s)'">0</div>
+            </div>
+            <div class="kpi">
+                <div class="label">Vehicules presents</div>
+                <div class="value" th:text="${stats.ongoingSessions()}">0</div>
+                <div class="hint"
+                     th:text="${stats.entriesToday()} + ' entree(s) / ' + ${stats.exitsToday()} + ' sortie(s) aujourd hui'">
+                </div>
+            </div>
+            <div class="kpi" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+                <div class="label">Recette du jour</div>
+                <div class="value" th:text="${stats.revenueToday()} + ' ' + ${stats.currency()}">0</div>
+                <div class="hint" th:text="'Mois : ' + ${stats.revenueThisMonth()} + ' ' + ${stats.currency()}"></div>
+            </div>
+            <div class="kpi" sec:authorize="hasAnyRole('ADMIN','MANAGER')">
+                <div class="label">Abonnements actifs</div>
+                <div class="value" th:text="${stats.activeSubscriptions()}">0</div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------- plan du parking -->
+        <div class="card">
+            <h2>Plan du parking</h2>
+            <div class="map-legend">
+                <span class="legend-item"><span class="legend-dot free"></span> Libre</span>
+                <span class="legend-item"><span class="legend-dot reserved"></span> Reservee</span>
+                <span class="legend-item"><span class="legend-dot occupied"></span> Occupee</span>
+                <span class="legend-item"><span class="legend-dot disabled"></span> Hors service</span>
+            </div>
+
+            <div class="zone-block" th:each="zone : ${zonedSpaces}">
+                <h3>
+                    <span th:text="'Zone ' + ${zone.key}">Zone A</span>
+                    <span th:text="'(' + ${#lists.size(zone.value)} + ' places)'" style="font-weight:400"></span>
+                </h3>
+                <div class="slot-grid">
+                    <div th:each="space : ${zone.value}"
+                         th:class="'slot ' + ${space.status().name()}"
+                         th:title="${space.typeLabel()} + ' - ' + ${space.statusLabel()}">
+                        <span th:text="${space.number()}">A01</span>
+                        <small th:text="${space.typeLabel()}">Standard</small>
+                    </div>
+                </div>
+            </div>
+            <div class="empty" th:if="${#maps.isEmpty(zonedSpaces)}">Aucune place enregistree.</div>
+        </div>
+
+        <!-- --------------------------------------- vehicules presents -->
+        <div class="card">
+            <h2>Vehicules actuellement dans le parking</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Immatriculation</th>
+                        <th>Client</th>
+                        <th>Place</th>
+                        <th>Zone</th>
+                        <th>Entree</th>
+                        <th>Duree</th>
+                        <th sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ps : ${ongoing}">
+                        <td th:text="${ps.reference()}"></td>
+                        <td><strong th:text="${ps.plateNumber()}"></strong></td>
+                        <td th:text="${ps.userName()}"></td>
+                        <td th:text="${ps.spaceNumber()}"></td>
+                        <td th:text="${ps.zone()}"></td>
+                        <td th:text="${#temporals.format(ps.entryTime(), 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${ps.durationMinutes()} + ' min'"></td>
+                        <td sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')">
+                            <a class="btn small primary"
+                               th:href="@{/sessions/exit(plateNumber=${ps.plateNumber()})}">Sortie</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty" th:if="${#lists.isEmpty(ongoing)}">Aucun vehicule dans le parking.</div>
+            </div>
+        </div>
+
+        <!-- ------------------------------------------ occupation zones -->
+        <div class="card">
+            <h2>Occupation par zone</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Zone</th>
+                        <th>Total</th>
+                        <th>Libres</th>
+                        <th>Occupees</th>
+                        <th>Taux</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="zone : ${occupancy.zones()}">
+                        <td th:text="${zone.zone()}"></td>
+                        <td th:text="${zone.total()}"></td>
+                        <td th:text="${zone.free()}"></td>
+                        <td th:text="${zone.occupied()}"></td>
+                        <td th:text="${zone.occupancyRate()} + ' %'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

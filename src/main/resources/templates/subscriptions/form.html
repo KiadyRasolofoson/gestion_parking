@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Nouvel abonnement')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Nouvel abonnement</h1>
+                <p>La date de fin est calculee automatiquement selon le type choisi.</p>
+            </div>
+            <a class="btn" th:href="@{/subscriptions}">Retour</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form th:action="@{/subscriptions}" th:object="${form}" method="post">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="userId">Client</label>
+                        <select id="userId" th:field="*{userId}">
+                            <option value="">-- Choisir --</option>
+                            <option th:each="u : ${users}" th:value="${u.id()}" th:text="${u.fullName()}"></option>
+                        </select>
+                        <span class="error-text" th:if="${#fields.hasErrors('userId')}" th:errors="*{userId}"></span>
+                    </div>
+                    <div class="field">
+                        <label for="vehicleId">Vehicule</label>
+                        <select id="vehicleId" th:field="*{vehicleId}">
+                            <option value="">-- Choisir --</option>
+                            <option th:each="v : ${vehicles}" th:value="${v.id()}"
+                                    th:text="${v.plateNumber()} + ' (' + ${v.ownerName()} + ')'"></option>
+                        </select>
+                        <span class="error-text" th:if="${#fields.hasErrors('vehicleId')}"
+                              th:errors="*{vehicleId}"></span>
+                    </div>
+                    <div class="field">
+                        <label for="type">Type d'abonnement</label>
+                        <select id="type" th:field="*{type}">
+                            <option th:each="t : ${subscriptionTypes}" th:value="${t}"
+                                    th:text="${t.label} + ' - ' + ${catalogPrices.get(t.name())} + ' ' + ${currency}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="startDate">Date de debut</label>
+                        <input type="date" id="startDate" th:field="*{startDate}">
+                        <span class="error-text" th:if="${#fields.hasErrors('startDate')}"
+                              th:errors="*{startDate}"></span>
+                    </div>
+                    <div class="field">
+                        <label for="price">Prix (vide = tarif du catalogue)</label>
+                        <input type="number" step="0.01" min="0" id="price" th:field="*{price}">
+                        <span class="error-text" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn primary" type="submit">Creer l'abonnement</button>
+                    <a class="btn" th:href="@{/subscriptions}">Annuler</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Catalogue des prix</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Prix</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry : ${catalogPrices}">
+                        <td th:text="${entry.key}"></td>
+                        <td th:text="${entry.value} + ' ' + ${currency}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

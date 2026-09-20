@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Champs partages entre la creation et la modification d'une regle tarifaire. -->
+<div th:fragment="fields" class="form-grid">
+    <div class="field">
+        <label for="name">Nom de la regle</label>
+        <input type="text" id="name" th:field="*{name}">
+        <span class="error-text" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+    </div>
+    <div class="field">
+        <label for="zone">Zone concernee</label>
+        <select id="zone" th:field="*{zone}">
+            <option value="">Toutes les zones</option>
+            <option th:each="z : ${zones}" th:value="${z}" th:text="${z}"></option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="spaceType">Type de place</label>
+        <select id="spaceType" th:field="*{spaceType}">
+            <option value="">Tous</option>
+            <option th:each="t : ${spaceTypes}" th:value="${t}" th:text="${t.label}"></option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="vehicleType">Type de vehicule</label>
+        <select id="vehicleType" th:field="*{vehicleType}">
+            <option value="">Tous</option>
+            <option th:each="t : ${vehicleTypes}" th:value="${t}" th:text="${t.label}"></option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="userCategory">Categorie d'utilisateur</label>
+        <select id="userCategory" th:field="*{userCategory}">
+            <option value="">Toutes</option>
+            <option th:each="c : ${userCategories}" th:value="${c}" th:text="${c.label}"></option>
+        </select>
+    </div>
+    <div class="field">
+        <label for="hourlyRate">Tarif horaire</label>
+        <input type="number" step="0.01" min="0" id="hourlyRate" th:field="*{hourlyRate}">
+        <span class="error-text" th:if="${#fields.hasErrors('hourlyRate')}" th:errors="*{hourlyRate}"></span>
+    </div>
+    <div class="field">
+        <label for="minimumFee">Tarif minimum</label>
+        <input type="number" step="0.01" min="0" id="minimumFee" th:field="*{minimumFee}">
+        <span class="error-text" th:if="${#fields.hasErrors('minimumFee')}" th:errors="*{minimumFee}"></span>
+    </div>
+    <div class="field">
+        <label for="dailyCap">Forfait journalier (24h)</label>
+        <input type="number" step="0.01" min="0" id="dailyCap" th:field="*{dailyCap}">
+        <span class="error-text" th:if="${#fields.hasErrors('dailyCap')}" th:errors="*{dailyCap}"></span>
+    </div>
+    <div class="field">
+        <label for="overstayMultiplier">Coefficient de depassement</label>
+        <input type="number" step="0.01" min="1" id="overstayMultiplier" th:field="*{overstayMultiplier}">
+        <span class="error-text" th:if="${#fields.hasErrors('overstayMultiplier')}"
+              th:errors="*{overstayMultiplier}"></span>
+    </div>
+    <div class="field">
+        <label for="subscriberDiscountPercent">Reduction abonne (%)</label>
+        <input type="number" step="0.01" min="0" id="subscriberDiscountPercent"
+               th:field="*{subscriberDiscountPercent}">
+        <span class="error-text" th:if="${#fields.hasErrors('subscriberDiscountPercent')}"
+              th:errors="*{subscriberDiscountPercent}"></span>
+    </div>
+    <div class="field">
+        <label for="freeMinutes">Franchise gratuite (minutes)</label>
+        <input type="number" min="0" id="freeMinutes" th:field="*{freeMinutes}">
+        <span class="error-text" th:if="${#fields.hasErrors('freeMinutes')}" th:errors="*{freeMinutes}"></span>
+    </div>
+    <div class="field">
+        <label for="priority">Priorite</label>
+        <input type="number" min="0" id="priority" th:field="*{priority}">
+        <span class="error-text" th:if="${#fields.hasErrors('priority')}" th:errors="*{priority}"></span>
+    </div>
+    <div class="field">
+        <label for="active">Regle active</label>
+        <select id="active" th:field="*{active}">
+            <option value="true">Oui</option>
+            <option value="false">Non</option>
+        </select>
+    </div>
+</div>
+</body>
+</html>

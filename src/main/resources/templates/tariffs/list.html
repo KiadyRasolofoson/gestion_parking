@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tarification')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Regles tarifaires</h1>
+                <p>La regle active la plus prioritaire et la plus specifique est appliquee.
+                    Un critere vide signifie "s'applique a tout".</p>
+            </div>
+            <a class="btn primary" th:href="@{/tariffs/new}">Nouvelle regle</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Priorite</th>
+                        <th>Nom</th>
+                        <th>Zone</th>
+                        <th>Type place</th>
+                        <th>Type vehicule</th>
+                        <th>Categorie</th>
+                        <th>Tarif horaire</th>
+                        <th>Minimum</th>
+                        <th>Forfait 24h</th>
+                        <th>Depassement</th>
+                        <th>Reduction abonne</th>
+                        <th>Franchise</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="rule : ${page.content}">
+                        <td th:text="${rule.priority()}"></td>
+                        <td><strong th:text="${rule.name()}"></strong></td>
+                        <td th:text="${rule.zone()} ?: 'Toutes'"></td>
+                        <td th:text="${rule.spaceType()} != null ? ${rule.spaceType().label} : 'Tous'"></td>
+                        <td th:text="${rule.vehicleType()} != null ? ${rule.vehicleType().label} : 'Tous'"></td>
+                        <td th:text="${rule.userCategory()} != null ? ${rule.userCategory().label} : 'Toutes'"></td>
+                        <td th:text="${rule.hourlyRate()} + ' ' + ${currency}"></td>
+                        <td th:text="${rule.minimumFee()} + ' ' + ${currency}"></td>
+                        <td th:text="${rule.dailyCap()} != null ? ${rule.dailyCap()} + ' ' + ${currency} : '-'"></td>
+                        <td th:text="'x' + ${rule.overstayMultiplier()}"></td>
+                        <td th:text="${rule.subscriberDiscountPercent()} + ' %'"></td>
+                        <td th:text="${rule.freeMinutes()} + ' min'"></td>
+                        <td th:text="${rule.active()} ? 'Oui' : 'Non'"></td>
+                        <td>
+                            <a class="btn small" th:href="@{'/tariffs/' + ${rule.id()} + '/edit'}">Modifier</a>
+                            <form class="inline-form" method="post"
+                                  th:action="@{'/tariffs/' + ${rule.id()} + '/delete'}"
+                                  onsubmit="return confirm('Supprimer cette regle ?');">
+                                <button class="btn small danger" type="submit">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty" th:if="${page.totalElements == 0}">Aucune regle tarifaire.</div>
+            </div>
+
+            <div th:replace="~{fragments/layout :: pager(${page}, '/tariffs', ${filterQuery})}"></div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

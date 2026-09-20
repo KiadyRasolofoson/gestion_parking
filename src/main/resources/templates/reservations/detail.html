@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Detail reservation')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1 th:text="'Reservation ' + ${reservation.reference()}">Reservation</h1>
+                <p>
+                    <span th:class="'badge ' + ${reservation.status().name()}"
+                          th:text="${reservation.statusLabel()}"></span>
+                </p>
+            </div>
+            <a class="btn" th:href="@{/reservations}">Retour</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <div class="detail-grid">
+                <div><span>Client</span><strong th:text="${reservation.userName()}"></strong></div>
+                <div><span>Vehicule</span><strong th:text="${reservation.plateNumber()}"></strong></div>
+                <div><span>Place</span><strong th:text="${reservation.spaceNumber()}"></strong></div>
+                <div><span>Zone</span><strong th:text="${reservation.zone()}"></strong></div>
+                <div><span>Arrivee prevue</span>
+                    <strong th:text="${#temporals.format(reservation.expectedArrival(), 'dd/MM/yyyy HH:mm')}"></strong>
+                </div>
+                <div><span>Depart prevu</span>
+                    <strong th:text="${#temporals.format(reservation.expectedDeparture(), 'dd/MM/yyyy HH:mm')}"></strong>
+                </div>
+                <div><span>Duree prevue</span>
+                    <strong th:text="${reservation.expectedDurationMinutes()} + ' minutes'"></strong></div>
+                <div><span>Creee le</span>
+                    <strong th:text="${#temporals.format(reservation.createdAt(), 'dd/MM/yyyy HH:mm')}"></strong></div>
+            </div>
+
+            <p th:if="${reservation.notes()}" th:text="'Remarques : ' + ${reservation.notes()}"></p>
+
+            <div class="form-actions" th:if="${reservation.status().name() == 'CONFIRMEE'}">
+                <a class="btn" th:href="@{'/reservations/' + ${reservation.id()} + '/edit'}">Modifier</a>
+                <form class="inline-form" method="post"
+                      th:action="@{'/reservations/' + ${reservation.id()} + '/cancel'}"
+                      onsubmit="return confirm('Annuler cette reservation ?');">
+                    <button class="btn danger" type="submit">Annuler la reservation</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

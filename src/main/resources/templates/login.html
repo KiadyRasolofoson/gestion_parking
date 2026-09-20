@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Connexion')}"></head>
+<body>
+<div class="login-page">
+    <div class="login-card">
+        <h1 th:text="${parkingName} ?: 'Gestion de parking'">Parking Central</h1>
+        <p class="subtitle">Connectez-vous pour acceder a la gestion du parking.</p>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="field">
+                <label for="username">Nom d'utilisateur</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+            <div class="field">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button class="btn primary" type="submit">Se connecter</button>
+        </form>
+
+        <div class="demo-accounts">
+            <strong>Comptes de demonstration</strong><br>
+            <code>admin / admin123</code> - configuration<br>
+            <code>manager / manager123</code> - gestion metier<br>
+            <code>operator / operator123</code> - entrees et sorties<br>
+            <code>client / client123</code> - consultation et reservation
+        </div>
+    </div>
+</div>
+</body>
+</html>

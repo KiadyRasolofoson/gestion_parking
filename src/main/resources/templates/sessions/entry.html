@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Entree vehicule')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Enregistrer une entree</h1>
+                <p>Le systeme honore la reservation du vehicule si elle existe, sinon il attribue
+                    automatiquement une place compatible (regles de substitution).</p>
+            </div>
+            <a class="btn" th:href="@{/sessions}">Historique</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form th:action="@{/sessions/entry}" th:object="${form}" method="post">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="plateNumber">Immatriculation</label>
+                        <input type="text" id="plateNumber" th:field="*{plateNumber}" placeholder="1234TAA"
+                               autofocus>
+                        <span class="error-text" th:if="${#fields.hasErrors('plateNumber')}"
+                              th:errors="*{plateNumber}"></span>
+                    </div>
+                    <div class="field">
+                        <label for="preferredZone">Zone preferee (facultatif)</label>
+                        <select id="preferredZone" th:field="*{preferredZone}">
+                            <option value="">Aucune preference</option>
+                            <option th:each="z : ${zones}" th:value="${z}" th:text="${z}"></option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="spaceId">Place imposee (facultatif)</label>
+                        <select id="spaceId" th:field="*{spaceId}">
+                            <option value="">Attribution automatique</option>
+                            <option th:each="s : ${availableSpaces}" th:value="${s.id()}"
+                                    th:text="${s.number()} + ' - ' + ${s.typeLabel()}
+                                             + ' - zone ' + ${s.zone()}"></option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="entryTime">Horodatage (vide = maintenant)</label>
+                        <input type="datetime-local" id="entryTime" th:field="*{entryTime}">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn primary" type="submit">Enregistrer l'entree</button>
+                    <a class="btn" th:href="@{/dashboard}">Annuler</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Places libres</h2>
+            <div class="slot-grid">
+                <div th:each="space : ${availableSpaces}" class="slot LIBRE">
+                    <span th:text="${space.number()}"></span>
+                    <small th:text="${space.typeLabel()}"></small>
+                </div>
+            </div>
+            <div class="empty" th:if="${#lists.isEmpty(availableSpaces)}">Parking complet.</div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

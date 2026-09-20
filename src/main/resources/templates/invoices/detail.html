@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Facture')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1 th:text="'Facture ' + ${invoice.reference()}">Facture</h1>
+                <p><span th:class="'badge ' + ${invoice.status().name()}" th:text="${invoice.statusLabel()}"></span>
+                    <span th:text="' - emise le ' + ${#temporals.format(invoice.issuedAt(), 'dd/MM/yyyy HH:mm')}"></span>
+                </p>
+            </div>
+            <a class="btn" th:href="@{/invoices}">Retour</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <h2>Informations</h2>
+            <div class="detail-grid">
+                <div><span>Client</span><strong th:text="${invoice.userName()}"></strong></div>
+                <div><span>Vehicule</span><strong th:text="${invoice.plateNumber()}"></strong></div>
+                <div><span>Place</span><strong th:text="${invoice.spaceNumber()}"></strong></div>
+                <div><span>Session</span><strong th:text="${invoice.sessionReference()}"></strong></div>
+                <div><span>Tarif applique</span><strong th:text="${invoice.appliedTariff()}"></strong></div>
+                <div><span>Duree facturee</span><strong th:text="${invoice.billedMinutes()} + ' minutes'"></strong>
+                </div>
+                <div><span>Duree prevue (reservation)</span>
+                    <strong th:text="${invoice.expectedMinutes()} + ' minutes'"></strong></div>
+                <div><span>Depassement</span>
+                    <strong th:text="${invoice.overstayMinutes()} + ' minutes'"></strong></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Detail du montant</h2>
+            <div class="total-line">
+                <span>Stationnement</span>
+                <span th:text="${invoice.baseAmount()} + ' ' + ${currency}"></span>
+            </div>
+            <div class="total-line">
+                <span>Depassement de reservation</span>
+                <span th:text="${invoice.overstayAmount()} + ' ' + ${currency}"></span>
+            </div>
+            <div class="total-line">
+                <span>Reduction abonne</span>
+                <span th:text="'- ' + ${invoice.discountAmount()} + ' ' + ${currency}"></span>
+            </div>
+            <div class="total-line grand">
+                <span>Total a payer</span>
+                <span th:text="${invoice.totalAmount()} + ' ' + ${currency}"></span>
+            </div>
+
+            <p style="margin-top:14px;color:var(--text-muted);font-size:13px"
+               th:text="${invoice.details()}"></p>
+
+            <div class="form-actions">
+                <form class="inline-form" method="post" th:action="@{'/invoices/' + ${invoice.id()} + '/pay'}"
+                      th:if="${invoice.status().name() == 'EN_ATTENTE'}">
+                    <button class="btn primary" type="submit">Marquer comme reglee</button>
+                </form>
+                <form class="inline-form" method="post" th:action="@{'/invoices/' + ${invoice.id()} + '/cancel'}"
+                      th:if="${invoice.status().name() == 'EN_ATTENTE'}"
+                      onsubmit="return confirm('Annuler cette facture ?');">
+                    <button class="btn danger" type="submit">Annuler la facture</button>
+                </form>
+                <a class="btn" th:href="@{'/sessions/' + ${invoice.sessionId()}}">Voir la session</a>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

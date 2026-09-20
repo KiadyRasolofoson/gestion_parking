@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Plan du parking')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Plan du parking</h1>
+                <p>Representation visuelle des places libres, reservees, occupees et hors service.</p>
+            </div>
+            <a class="btn" th:href="@{/spaces/available}">Places disponibles</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="kpi-grid">
+            <div class="kpi">
+                <div class="label">Total</div>
+                <div class="value" th:text="${occupancy.totalSpaces()}">0</div>
+            </div>
+            <div class="kpi free">
+                <div class="label">Libres</div>
+                <div class="value" th:text="${occupancy.freeSpaces()}">0</div>
+            </div>
+            <div class="kpi reserved">
+                <div class="label">Reservees</div>
+                <div class="value" th:text="${occupancy.reservedSpaces()}">0</div>
+            </div>
+            <div class="kpi occupied">
+                <div class="label">Occupees</div>
+                <div class="value" th:text="${occupancy.occupiedSpaces()}">0</div>
+                <div class="hint" th:text="'Taux ' + ${occupancy.occupancyRate()} + ' %'"></div>
+            </div>
+            <div class="kpi">
+                <div class="label">Hors service</div>
+                <div class="value" th:text="${occupancy.outOfServiceSpaces()}">0</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="map-legend">
+                <span class="legend-item"><span class="legend-dot free"></span> Libre</span>
+                <span class="legend-item"><span class="legend-dot reserved"></span> Reservee</span>
+                <span class="legend-item"><span class="legend-dot occupied"></span> Occupee</span>
+                <span class="legend-item"><span class="legend-dot disabled"></span> Hors service</span>
+            </div>
+
+            <div class="zone-block" th:each="zone : ${zonedSpaces}">
+                <h3>
+                    <span th:text="'Zone ' + ${zone.key}">Zone A</span>
+                    <span style="font-weight:400"
+                          th:text="'- ' + ${#lists.size(zone.value)} + ' places'"></span>
+                </h3>
+                <div class="slot-grid">
+                    <div th:each="space : ${zone.value}"
+                         th:class="'slot ' + ${space.status().name()}"
+                         th:title="${space.typeLabel()} + ' - ' + ${space.statusLabel()}
+                                   + (${space.outOfServiceReason()} != null ? ' - ' + ${space.outOfServiceReason()} : '')">
+                        <span th:text="${space.number()}">A01</span>
+                        <small th:text="${space.typeLabel()}">Standard</small>
+                    </div>
+                </div>
+            </div>
+            <div class="empty" th:if="${#maps.isEmpty(zonedSpaces)}">Aucune place enregistree.</div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

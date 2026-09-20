@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Abonnements')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Abonnements</h1>
+                <p>La validite est deduite automatiquement du statut et de la periode.</p>
+            </div>
+            <div>
+                <a class="btn primary" th:href="@{/subscriptions/new}">Nouvel abonnement</a>
+                <form class="inline-form" method="post" th:action="@{/subscriptions/refresh-expired}">
+                    <button class="btn" type="submit">Mettre a jour les echeances</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form class="filters" method="get" th:action="@{/subscriptions}">
+                <div class="field wide">
+                    <label for="search">Recherche (reference, immatriculation, client)</label>
+                    <input type="text" id="search" name="search" th:value="${search}">
+                </div>
+                <div class="field">
+                    <label for="status">Statut</label>
+                    <select id="status" name="status">
+                        <option value="">Tous</option>
+                        <option th:each="s : ${subscriptionStatuses}" th:value="${s}" th:text="${s.label}"
+                                th:selected="${s == status}"></option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="type">Type</label>
+                    <select id="type" name="type">
+                        <option value="">Tous</option>
+                        <option th:each="t : ${subscriptionTypes}" th:value="${t}" th:text="${t.label}"
+                                th:selected="${t == type}"></option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="validOn">Valide le</label>
+                    <input type="date" id="validOn" name="validOn" th:value="${validOn}">
+                </div>
+                <div class="field">
+                    <label for="sort">Tri</label>
+                    <select id="sort" name="sort">
+                        <option value="startDate,desc">Debut (recent)</option>
+                        <option value="endDate,asc">Fin (proche)</option>
+                        <option value="price,desc">Prix</option>
+                    </select>
+                </div>
+                <button class="btn primary" type="submit">Filtrer</button>
+                <a class="btn" th:href="@{/subscriptions}">Reinitialiser</a>
+            </form>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Client</th>
+                        <th>Vehicule</th>
+                        <th>Type</th>
+                        <th>Debut</th>
+                        <th>Fin</th>
+                        <th>Jours restants</th>
+                        <th>Prix</th>
+                        <th>Statut</th>
+                        <th>Valide</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="sub : ${page.content}">
+                        <td th:text="${sub.reference()}"></td>
+                        <td th:text="${sub.userName()}"></td>
+                        <td th:text="${sub.plateNumber()}"></td>
+                        <td th:text="${sub.typeLabel()}"></td>
+                        <td th:text="${#temporals.format(sub.startDate(), 'dd/MM/yyyy')}"></td>
+                        <td th:text="${#temporals.format(sub.endDate(), 'dd/MM/yyyy')}"></td>
+                        <td th:text="${sub.remainingDays()}"></td>
+                        <td th:text="${sub.price()} + ' ' + ${currency}"></td>
+                        <td><span th:class="'badge ' + ${sub.status().name()}" th:text="${sub.statusLabel()}"></span>
+                        </td>
+                        <td th:text="${sub.valid()} ? 'Oui' : 'Non'"></td>
+                        <td>
+                            <form class="inline-form" method="post"
+                                  th:action="@{'/subscriptions/' + ${sub.id()} + '/suspend'}"
+                                  th:if="${sub.status().name() == 'ACTIF'}">
+                                <button class="btn small" type="submit">Suspendre</button>
+                            </form>
+                            <form class="inline-form" method="post"
+                                  th:action="@{'/subscriptions/' + ${sub.id()} + '/reactivate'}"
+                                  th:if="${sub.status().name() == 'SUSPENDU'}">
+                                <button class="btn small" type="submit">Reactiver</button>
+                            </form>
+                            <form class="inline-form" method="post"
+                                  th:action="@{'/subscriptions/' + ${sub.id()} + '/cancel'}"
+                                  th:if="${sub.status().name() != 'ANNULE'}"
+                                  onsubmit="return confirm('Annuler cet abonnement ?');">
+                                <button class="btn small danger" type="submit">Annuler</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty" th:if="${page.totalElements == 0}">Aucun abonnement trouve.</div>
+            </div>
+
+            <div th:replace="~{fragments/layout :: pager(${page}, '/subscriptions', ${filterQuery})}"></div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

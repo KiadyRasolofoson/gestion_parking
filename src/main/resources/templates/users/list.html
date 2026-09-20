@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Utilisateurs')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Utilisateurs</h1>
+                <p>Roles : ADMIN (configuration), MANAGER (gestion), OPERATOR (entrees / sorties),
+                    USER (consultation).</p>
+            </div>
+            <a class="btn primary" th:href="@{/users/new}">Nouveau compte</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form class="filters" method="get" th:action="@{/users}">
+                <div class="field wide">
+                    <label for="search">Recherche (nom, identifiant, email)</label>
+                    <input type="text" id="search" name="search" th:value="${search}">
+                </div>
+                <div class="field">
+                    <label for="role">Role</label>
+                    <select id="role" name="role">
+                        <option value="">Tous</option>
+                        <option th:each="r : ${roles}" th:value="${r}" th:text="${r.label}"
+                                th:selected="${r == role}"></option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="category">Categorie</label>
+                    <select id="category" name="category">
+                        <option value="">Toutes</option>
+                        <option th:each="c : ${userCategories}" th:value="${c}" th:text="${c.label}"
+                                th:selected="${c == category}"></option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="enabled">Actif</label>
+                    <select id="enabled" name="enabled">
+                        <option value="">Tous</option>
+                        <option value="true" th:selected="${enabled != null and enabled}">Oui</option>
+                        <option value="false" th:selected="${enabled != null and !enabled}">Non</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="sort">Tri</label>
+                    <select id="sort" name="sort">
+                        <option value="lastName,asc">Nom</option>
+                        <option value="username,asc">Identifiant</option>
+                        <option value="role,asc">Role</option>
+                    </select>
+                </div>
+                <button class="btn primary" type="submit">Filtrer</button>
+                <a class="btn" th:href="@{/users}">Reinitialiser</a>
+            </form>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Identifiant</th>
+                        <th>Nom complet</th>
+                        <th>Email</th>
+                        <th>Telephone</th>
+                        <th>Role</th>
+                        <th>Categorie</th>
+                        <th>Vehicules</th>
+                        <th>Actif</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${page.content}">
+                        <td><strong th:text="${user.username()}"></strong></td>
+                        <td th:text="${user.fullName()}"></td>
+                        <td th:text="${user.email()}"></td>
+                        <td th:text="${user.phone()}"></td>
+                        <td th:text="${user.role().label}"></td>
+                        <td><span th:class="'badge ' + ${user.category().name()}"
+                                  th:text="${user.category().label}"></span></td>
+                        <td th:text="${user.vehicleCount()}"></td>
+                        <td th:text="${user.enabled()} ? 'Oui' : 'Non'"></td>
+                        <td>
+                            <a class="btn small" th:href="@{'/users/' + ${user.id()} + '/edit'}">Modifier</a>
+                            <form class="inline-form" method="post"
+                                  th:action="@{'/users/' + ${user.id()} + '/delete'}"
+                                  onsubmit="return confirm('Supprimer ce compte ?');">
+                                <button class="btn small danger" type="submit">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty" th:if="${page.totalElements == 0}">Aucun utilisateur trouve.</div>
+            </div>
+
+            <div th:replace="~{fragments/layout :: pager(${page}, '/users', ${filterQuery})}"></div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

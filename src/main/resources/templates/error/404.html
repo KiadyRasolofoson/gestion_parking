@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Introuvable')}"></head>
+<body>
+<div class="error-page">
+    <div class="code">404</div>
+    <h1 th:text="${errorTitle} ?: 'Ressource introuvable'">Ressource introuvable</h1>
+    <p th:text="${errorMessage} ?: 'La page ou la ressource demandee n existe pas.'"></p>
+    <a class="btn primary" th:href="@{/dashboard}">Retour au tableau de bord</a>
+</div>
+</body>
+</html>

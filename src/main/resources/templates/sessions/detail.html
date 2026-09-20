@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Detail session')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1 th:text="'Session ' + ${parkingSession.reference()}">Session</h1>
+                <p><span th:class="'badge ' + ${parkingSession.status().name()}" th:text="${parkingSession.statusLabel()}"></span>
+                </p>
+            </div>
+            <a class="btn" th:href="@{/sessions}">Retour</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <div class="detail-grid">
+                <div><span>Immatriculation</span><strong th:text="${parkingSession.plateNumber()}"></strong></div>
+                <div><span>Client</span><strong th:text="${parkingSession.userName()}"></strong></div>
+                <div><span>Place</span><strong th:text="${parkingSession.spaceNumber()}"></strong></div>
+                <div><span>Zone</span><strong th:text="${parkingSession.zone()}"></strong></div>
+                <div><span>Entree</span>
+                    <strong th:text="${#temporals.format(parkingSession.entryTime(), 'dd/MM/yyyy HH:mm')}"></strong></div>
+                <div><span>Sortie</span>
+                    <strong th:text="${parkingSession.exitTime()} != null
+                            ? ${#temporals.format(parkingSession.exitTime(), 'dd/MM/yyyy HH:mm')} : 'En cours'"></strong>
+                </div>
+                <div><span>Duree</span><strong th:text="${parkingSession.durationMinutes()} + ' minutes'"></strong></div>
+                <div><span>Reservation</span><strong th:text="${parkingSession.reservationReference()} ?: 'Sans reservation'"></strong>
+                </div>
+                <div><span>Operateur entree</span><strong th:text="${parkingSession.entryOperator()} ?: '-'"></strong></div>
+                <div><span>Operateur sortie</span><strong th:text="${parkingSession.exitOperator()} ?: '-'"></strong></div>
+            </div>
+        </div>
+
+        <div class="card" th:if="${parkingSession.invoice()} != null">
+            <h2>Facturation</h2>
+            <div class="detail-grid">
+                <div><span>Reference facture</span><strong th:text="${parkingSession.invoice().reference()}"></strong></div>
+                <div><span>Statut</span>
+                    <strong><span th:class="'badge ' + ${parkingSession.invoice().status().name()}"
+                                  th:text="${parkingSession.invoice().statusLabel()}"></span></strong></div>
+                <div><span>Montant total</span>
+                    <strong th:text="${parkingSession.invoice().totalAmount()} + ' ' + ${currency}"></strong></div>
+            </div>
+            <div class="form-actions">
+                <a class="btn primary" th:href="@{'/invoices/' + ${parkingSession.invoice().id()}}">Voir la facture</a>
+            </div>
+        </div>
+
+        <div class="card" th:if="${parkingSession.status().name() == 'EN_COURS'}">
+            <h2>Sortie</h2>
+            <a class="btn primary" th:href="@{/sessions/exit(plateNumber=${parkingSession.plateNumber()})}">
+                Enregistrer la sortie de ce vehicule</a>
+        </div>
+    </main>
+</div>
+</body>
+</html>

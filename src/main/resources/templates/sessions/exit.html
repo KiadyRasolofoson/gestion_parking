@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sortie vehicule')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Enregistrer une sortie</h1>
+                <p>La place est liberee et la facture est calculee automatiquement, depassement de
+                    reservation inclus.</p>
+            </div>
+            <a class="btn" th:href="@{/sessions}">Historique</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form th:action="@{/sessions/exit}" th:object="${form}" method="post">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="plateNumber">Immatriculation</label>
+                        <input type="text" id="plateNumber" th:field="*{plateNumber}" autofocus>
+                        <span class="error-text" th:if="${#fields.hasErrors('plateNumber')}"
+                              th:errors="*{plateNumber}"></span>
+                    </div>
+                    <div class="field">
+                        <label for="exitTime">Horodatage (vide = maintenant)</label>
+                        <input type="datetime-local" id="exitTime" th:field="*{exitTime}">
+                    </div>
+                    <div class="field">
+                        <label for="markAsPaid">Paiement</label>
+                        <select id="markAsPaid" th:field="*{markAsPaid}">
+                            <option value="true">Regle immediatement</option>
+                            <option value="false">Facture en attente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn primary" type="submit">Enregistrer la sortie</button>
+                    <a class="btn" th:href="@{/dashboard}">Annuler</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Vehicules presents</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Immatriculation</th>
+                        <th>Client</th>
+                        <th>Place</th>
+                        <th>Entree</th>
+                        <th>Duree</th>
+                        <th>Reservation</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ps : ${ongoing}">
+                        <td><strong th:text="${ps.plateNumber()}"></strong></td>
+                        <td th:text="${ps.userName()}"></td>
+                        <td th:text="${ps.spaceNumber()}"></td>
+                        <td th:text="${#temporals.format(ps.entryTime(), 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${ps.durationMinutes()} + ' min'"></td>
+                        <td th:text="${ps.reservationReference()} ?: '-'"></td>
+                        <td>
+                            <a class="btn small"
+                               th:href="@{/sessions/exit(plateNumber=${ps.plateNumber()})}">Selectionner</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty" th:if="${#lists.isEmpty(ongoing)}">Aucun vehicule dans le parking.</div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

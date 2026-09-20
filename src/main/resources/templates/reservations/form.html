@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Nouvelle reservation')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Nouvelle reservation</h1>
+                <p>Laissez la place vide pour laisser le systeme attribuer automatiquement une place
+                    compatible avec la categorie du client.</p>
+            </div>
+            <a class="btn" th:href="@{/reservations}">Retour</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form th:action="@{/reservations}" th:object="${form}" method="post">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="userId">Client</label>
+                        <select id="userId" th:field="*{userId}">
+                            <option value="">-- Choisir --</option>
+                            <option th:each="u : ${users}" th:value="${u.id()}"
+                                    th:text="${u.fullName()} + ' (' + ${u.category().label} + ')'"></option>
+                        </select>
+                        <span class="error-text" th:if="${#fields.hasErrors('userId')}"
+                              th:errors="*{userId}"></span>
+                    </div>
+                    <div class="field">
+                        <label for="vehicleId">Vehicule</label>
+                        <select id="vehicleId" th:field="*{vehicleId}">
+                            <option value="">-- Choisir --</option>
+                            <option th:each="v : ${vehicles}" th:value="${v.id()}"
+                                    th:text="${v.plateNumber()} + ' - ' + ${v.typeLabel()}
+                                             + ' (' + ${v.ownerName()} + ')'"></option>
+                        </select>
+                        <span class="error-text" th:if="${#fields.hasErrors('vehicleId')}"
+                              th:errors="*{vehicleId}"></span>
+                    </div>
+                    <div class="field">
+                        <label for="spaceId">Place souhaitee (facultatif)</label>
+                        <select id="spaceId" th:field="*{spaceId}">
+                            <option value="">Attribution automatique</option>
+                            <option th:each="s : ${availableSpaces}" th:value="${s.id()}"
+                                    th:text="${s.number()} + ' - ' + ${s.typeLabel()}
+                                             + ' - zone ' + ${s.zone()}"></option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="expectedArrival">Arrivee prevue</label>
+                        <input type="datetime-local" id="expectedArrival" th:field="*{expectedArrival}">
+                        <span class="error-text" th:if="${#fields.hasErrors('expectedArrival')}"
+                              th:errors="*{expectedArrival}"></span>
+                    </div>
+                    <div class="field">
+                        <label for="expectedDeparture">Depart prevu</label>
+                        <input type="datetime-local" id="expectedDeparture" th:field="*{expectedDeparture}">
+                        <span class="error-text" th:if="${#fields.hasErrors('expectedDeparture')}"
+                              th:errors="*{expectedDeparture}"></span>
+                    </div>
+                    <div class="field wide">
+                        <label for="notes">Remarques</label>
+                        <textarea id="notes" rows="2" th:field="*{notes}"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn primary" type="submit">Confirmer la reservation</button>
+                    <a class="btn" th:href="@{/reservations}">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+</html>

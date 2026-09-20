@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Erreur')}"></head>
+<body>
+<div class="error-page">
+    <div class="code" th:text="${status} ?: 'Erreur'">Erreur</div>
+    <h1 th:text="${error} ?: 'Une erreur est survenue'">Une erreur est survenue</h1>
+    <p th:text="${message}"></p>
+    <a class="btn primary" th:href="@{/dashboard}">Retour au tableau de bord</a>
+</div>
+</body>
+</html>

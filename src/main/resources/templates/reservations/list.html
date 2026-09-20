@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Reservations')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Reservations</h1>
+                <p>Une place ne peut pas recevoir deux reservations qui se chevauchent.</p>
+            </div>
+            <a class="btn primary" th:href="@{/reservations/new}">Nouvelle reservation</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form class="filters" method="get" th:action="@{/reservations}">
+                <div class="field wide">
+                    <label for="search">Recherche (reference, immatriculation, client, place)</label>
+                    <input type="text" id="search" name="search" th:value="${search}">
+                </div>
+                <div class="field">
+                    <label for="status">Statut</label>
+                    <select id="status" name="status">
+                        <option value="">Tous</option>
+                        <option th:each="s : ${reservationStatuses}" th:value="${s}" th:text="${s.label}"
+                                th:selected="${s == status}"></option>
+                    </select>
+                </div>
+                <div class="field" sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')">
+                    <label for="userId">Client</label>
+                    <select id="userId" name="userId">
+                        <option value="">Tous</option>
+                        <option th:each="u : ${users}" th:value="${u.id()}" th:text="${u.fullName()}"
+                                th:selected="${u.id() == userId}"></option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="sort">Tri</label>
+                    <select id="sort" name="sort">
+                        <option value="expectedArrival,desc">Arrivee (recent)</option>
+                        <option value="expectedArrival,asc">Arrivee (ancien)</option>
+                        <option value="createdAt,desc">Creation</option>
+                        <option value="status,asc">Statut</option>
+                    </select>
+                </div>
+                <button class="btn primary" type="submit">Filtrer</button>
+                <a class="btn" th:href="@{/reservations}">Reinitialiser</a>
+            </form>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Client</th>
+                        <th>Vehicule</th>
+                        <th>Place</th>
+                        <th>Arrivee prevue</th>
+                        <th>Depart prevu</th>
+                        <th>Duree</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="reservation : ${page.content}">
+                        <td><a th:href="@{'/reservations/' + ${reservation.id()}}"
+                               th:text="${reservation.reference()}"></a></td>
+                        <td th:text="${reservation.userName()}"></td>
+                        <td th:text="${reservation.plateNumber()}"></td>
+                        <td th:text="${reservation.spaceNumber()} + ' (' + ${reservation.zone()} + ')'"></td>
+                        <td th:text="${#temporals.format(reservation.expectedArrival(), 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${#temporals.format(reservation.expectedDeparture(), 'dd/MM/yyyy HH:mm')}"></td>
+                        <td th:text="${reservation.expectedDurationMinutes()} + ' min'"></td>
+                        <td><span th:class="'badge ' + ${reservation.status().name()}"
+                                  th:text="${reservation.statusLabel()}"></span></td>
+                        <td>
+                            <a class="btn small" th:href="@{'/reservations/' + ${reservation.id()} + '/edit'}"
+                               th:if="${reservation.status().name() == 'CONFIRMEE'}">Modifier</a>
+                            <form class="inline-form" method="post"
+                                  th:action="@{'/reservations/' + ${reservation.id()} + '/cancel'}"
+                                  th:if="${reservation.status().name() == 'CONFIRMEE'}"
+                                  onsubmit="return confirm('Annuler cette reservation ?');">
+                                <button class="btn small danger" type="submit">Annuler</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="empty" th:if="${page.totalElements == 0}">Aucune reservation trouvee.</div>
+            </div>
+
+            <div th:replace="~{fragments/layout :: pager(${page}, '/reservations', ${filterQuery})}"></div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

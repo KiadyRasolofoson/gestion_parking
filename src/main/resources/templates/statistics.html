@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Statistiques')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Statistiques</h1>
+                <p>Occupation du parking et chiffre d'affaires sur la periode choisie.</p>
+            </div>
+            <a class="btn" th:href="@{/invoices}">Facturation</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form class="filters" method="get" th:action="@{/statistics}">
+                <div class="field">
+                    <label for="from">Du</label>
+                    <input type="date" id="from" name="from" th:value="${from}">
+                </div>
+                <div class="field">
+                    <label for="to">Au</label>
+                    <input type="date" id="to" name="to" th:value="${to}">
+                </div>
+                <button class="btn primary" type="submit">Appliquer</button>
+            </form>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi">
+                <div class="label">Chiffre d'affaires</div>
+                <div class="value" th:text="${revenue.totalRevenue()} + ' ' + ${revenue.currency()}">0</div>
+                <div class="hint" th:text="${revenue.invoiceCount()} + ' facture(s)'"></div>
+            </div>
+            <div class="kpi">
+                <div class="label">Ticket moyen</div>
+                <div class="value" th:text="${revenue.averageTicket()} + ' ' + ${revenue.currency()}">0</div>
+            </div>
+            <div class="kpi">
+                <div class="label">Recette stationnement</div>
+                <div class="value" th:text="${revenue.parkingRevenue()}">0</div>
+            </div>
+            <div class="kpi reserved">
+                <div class="label">Recette depassements</div>
+                <div class="value" th:text="${revenue.overstayRevenue()}">0</div>
+            </div>
+            <div class="kpi">
+                <div class="label">Reductions accordees</div>
+                <div class="value" th:text="${revenue.discountGranted()}">0</div>
+            </div>
+            <div class="kpi occupied">
+                <div class="label">Taux d'occupation</div>
+                <div class="value" th:text="${occupancy.occupancyRate()} + ' %'">0</div>
+                <div class="hint" th:text="${occupancy.occupiedSpaces()} + ' / ' + ${occupancy.totalSpaces()}"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Chiffre d'affaires par jour</h2>
+            <div class="bar-chart">
+                <div th:each="day : ${revenue.daily()}" class="bar"
+                     th:with="pct=${maxDaily > 0 ? (day.amount().doubleValue() * 100 / maxDaily) : 0}"
+                     th:title="${day.date()} + ' : ' + ${day.amount()} + ' ' + ${revenue.currency()}"
+                     th:style="'height:' + ${pct} + '%'">
+                </div>
+            </div>
+            <div class="chart-labels">
+                <span th:each="day : ${revenue.daily()}"
+                      th:text="${#temporals.format(day.date(), 'dd/MM')}"></span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Detail par jour</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Factures</th>
+                        <th>Montant</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="day : ${revenue.daily()}">
+                        <td th:text="${#temporals.format(day.date(), 'dd/MM/yyyy')}"></td>
+                        <td th:text="${day.invoiceCount()}"></td>
+                        <td th:text="${day.amount()} + ' ' + ${revenue.currency()}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Occupation par zone</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Zone</th>
+                        <th>Total</th>
+                        <th>Libres</th>
+                        <th>Occupees</th>
+                        <th>Taux</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="zone : ${occupancy.zones()}">
+                        <td th:text="${zone.zone()}"></td>
+                        <td th:text="${zone.total()}"></td>
+                        <td th:text="${zone.free()}"></td>
+                        <td th:text="${zone.occupied()}"></td>
+                        <td th:text="${zone.occupancyRate()} + ' %'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Repartition des places par type</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Nombre</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="entry : ${occupancy.countByType()}">
+                        <td th:text="${entry.key}"></td>
+                        <td th:text="${entry.value}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

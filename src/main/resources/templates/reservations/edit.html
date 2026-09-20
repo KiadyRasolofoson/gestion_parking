@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Modifier une reservation')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Modifier la reservation</h1>
+                <p>Seules les reservations au statut CONFIRMEE peuvent etre modifiees.</p>
+            </div>
+            <a class="btn" th:href="@{/reservations}">Retour</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form th:action="@{'/reservations/' + ${reservationId}}" th:object="${form}" method="post">
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="spaceId">Place</label>
+                        <select id="spaceId" th:field="*{spaceId}">
+                            <option value="">Conserver la place actuelle</option>
+                            <option th:each="s : ${availableSpaces}" th:value="${s.id()}"
+                                    th:text="${s.number()} + ' - ' + ${s.typeLabel()}
+                                             + ' - zone ' + ${s.zone()}"></option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="expectedArrival">Arrivee prevue</label>
+                        <input type="datetime-local" id="expectedArrival" th:field="*{expectedArrival}">
+                        <span class="error-text" th:if="${#fields.hasErrors('expectedArrival')}"
+                              th:errors="*{expectedArrival}"></span>
+                    </div>
+                    <div class="field">
+                        <label for="expectedDeparture">Depart prevu</label>
+                        <input type="datetime-local" id="expectedDeparture" th:field="*{expectedDeparture}">
+                        <span class="error-text" th:if="${#fields.hasErrors('expectedDeparture')}"
+                              th:errors="*{expectedDeparture}"></span>
+                    </div>
+                    <div class="field wide">
+                        <label for="notes">Remarques</label>
+                        <textarea id="notes" rows="2" th:field="*{notes}"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn primary" type="submit">Enregistrer</button>
+                    <a class="btn" th:href="@{/reservations}">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+</html>

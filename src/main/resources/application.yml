@@ -1,0 +1,91 @@
+spring:
+  application:
+    name: parking-management
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:parking_db}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+    username: root
+    password: Bugatti120305
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      pool-name: parking-pool
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+
+  mvc:
+    problemdetails:
+      enabled: false
+
+  web:
+    resources:
+      cache:
+        period: 0
+
+  messages:
+    basename: messages
+    encoding: UTF-8
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: always
+    whitelabel:
+      enabled: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.example.parking: INFO
+    org.hibernate.SQL: WARN
+
+# ---------------------------------------------------------------------------
+# Parametres metier du parking (tarification, attribution, reservations)
+# ---------------------------------------------------------------------------
+parking:
+  name: "Parking Central"
+  seed-demo-data: true
+  pricing:
+    currency: "MGA"
+    default-hourly-rate: 2000.00
+    minimum-fee: 1000.00
+    daily-cap: 20000.00
+    free-minutes: 15
+    billing-increment-minutes: 15
+    overstay-multiplier: 1.50
+    subscriber-discount-percent: 20.00
+    vip-surcharge-percent: 25.00
+  reservation:
+    max-duration-hours: 48
+    min-duration-minutes: 30
+    grace-period-minutes: 30
+  allocation:
+    # Regles de substitution: type demande -> types acceptables par ordre de preference
+    substitution:
+      VIP: [ VIP, ABONNE, STANDARD ]
+      PMR: [ PMR, STANDARD ]
+      ABONNE: [ ABONNE, STANDARD ]
+      STANDARD: [ STANDARD ]
+  subscription:
+    daily-price: 15000.00
+    weekly-price: 80000.00
+    monthly-price: 250000.00
+    yearly-price: 2400000.00

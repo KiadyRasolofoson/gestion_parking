@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Acces refuse')}"></head>
+<body>
+<div class="error-page">
+    <div class="code">403</div>
+    <h1 th:text="${errorTitle} ?: 'Acces refuse'">Acces refuse</h1>
+    <p th:text="${errorMessage} ?: 'Votre role ne permet pas d acceder a cette page.'"></p>
+    <a class="btn primary" th:href="@{/dashboard}">Retour au tableau de bord</a>
+</div>
+</body>
+</html>

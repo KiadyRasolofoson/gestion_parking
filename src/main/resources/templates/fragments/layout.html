@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(pageTitle)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${pageTitle} + ' - ' + (${parkingName} ?: 'Gestion de parking')">Gestion de parking</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<!-- ------------------------------------------------------------- menu -->
+<aside class="sidebar" th:fragment="sidebar(activeMenu)">
+    <div class="brand">
+        <span th:text="${parkingName} ?: 'Gestion de parking'">Parking Central</span>
+        <small>Gestion des places et des acces</small>
+    </div>
+    <nav>
+        <a th:href="@{/dashboard}" th:classappend="${activeMenu == 'dashboard'} ? 'active'">Tableau de bord</a>
+
+        <div class="group-title">Parking</div>
+        <a th:href="@{/spaces/map}" th:classappend="${activeMenu == 'map'} ? 'active'">Plan du parking</a>
+        <a th:href="@{/spaces/available}" th:classappend="${activeMenu == 'available'} ? 'active'">Places
+            disponibles</a>
+        <a th:href="@{/spaces}" th:classappend="${activeMenu == 'spaces'} ? 'active'">Toutes les places</a>
+
+        <div class="group-title">Exploitation</div>
+        <a th:href="@{/reservations}" th:classappend="${activeMenu == 'reservations'} ? 'active'">Reservations</a>
+        <a sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')" th:href="@{/sessions/entry}"
+           th:classappend="${activeMenu == 'entry'} ? 'active'">Entree vehicule</a>
+        <a sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')" th:href="@{/sessions/exit}"
+           th:classappend="${activeMenu == 'exit'} ? 'active'">Sortie vehicule</a>
+        <a sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')" th:href="@{/sessions}"
+           th:classappend="${activeMenu == 'sessions'} ? 'active'">Historique entrees / sorties</a>
+        <a sec:authorize="hasAnyRole('ADMIN','MANAGER','OPERATOR')" th:href="@{/vehicles}"
+           th:classappend="${activeMenu == 'vehicles'} ? 'active'">Vehicules</a>
+
+        <div class="group-title" sec:authorize="hasAnyRole('ADMIN','MANAGER')">Gestion</div>
+        <a sec:authorize="hasAnyRole('ADMIN','MANAGER')" th:href="@{/subscriptions}"
+           th:classappend="${activeMenu == 'subscriptions'} ? 'active'">Abonnements</a>
+        <a sec:authorize="hasAnyRole('ADMIN','MANAGER')" th:href="@{/invoices}"
+           th:classappend="${activeMenu == 'invoices'} ? 'active'">Facturation</a>
+        <a sec:authorize="hasAnyRole('ADMIN','MANAGER')" th:href="@{/statistics}"
+           th:classappend="${activeMenu == 'statistics'} ? 'active'">Statistiques</a>
+
+        <div class="group-title" sec:authorize="hasRole('ADMIN')">Configuration</div>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/users}"
+           th:classappend="${activeMenu == 'users'} ? 'active'">Utilisateurs</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/tariffs}"
+           th:classappend="${activeMenu == 'tariffs'} ? 'active'">Tarification</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/swagger-ui.html}">Documentation API</a>
+    </nav>
+    <div class="session">
+        <strong sec:authentication="name">utilisateur</strong>
+        <span sec:authentication="principal.authorities">ROLE</span>
+        <form th:action="@{/logout}" method="post" style="margin-top:10px">
+            <button class="btn small" type="submit">Deconnexion</button>
+        </form>
+    </div>
+</aside>
+
+<!-- ----------------------------------------------------------- messages -->
+<div th:fragment="alerts">
+    <div class="alert success" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="alert error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+    <div class="alert info" th:if="${infoMessage}" th:text="${infoMessage}"></div>
+</div>
+
+<!-- ---------------------------------------------------------- pagination -->
+<div th:fragment="pager(page, baseUrl, filterQuery)" class="pager" th:if="${page != null and page.totalPages > 1}">
+    <a th:if="${!page.first}"
+       th:href="${baseUrl + '?page=0&size=' + page.size + filterQuery}">&laquo; Premiere</a>
+    <a th:if="${!page.first}"
+       th:href="${baseUrl + '?page=' + (page.number - 1) + '&size=' + page.size + filterQuery}">Precedente</a>
+    <span th:text="'Page ' + (${page.number} + 1) + ' / ' + ${page.totalPages}
+          + ' - ' + ${page.totalElements} + ' element(s)'">Page 1 / 1</span>
+    <a th:if="${!page.last}"
+       th:href="${baseUrl + '?page=' + (page.number + 1) + '&size=' + page.size + filterQuery}">Suivante</a>
+    <a th:if="${!page.last}"
+       th:href="${baseUrl + '?page=' + (page.totalPages - 1) + '&size=' + page.size + filterQuery}">Derniere
+        &raquo;</a>
+</div>
+
+<!-- --------------------------------------------------- erreurs de champ -->
+<div th:fragment="fieldError(field)">
+    <span class="error-text" th:if="${#fields.hasErrors(field)}" th:errors="*{__${field}__}"></span>
+</div>
+
+</body>
+</html>

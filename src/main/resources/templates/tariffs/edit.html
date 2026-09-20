@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Modifier une regle tarifaire')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+
+    <main class="content">
+        <div class="page-head">
+            <div>
+                <h1>Modifier la regle tarifaire</h1>
+                <p>Les factures deja emises ne sont pas recalculees.</p>
+            </div>
+            <a class="btn" th:href="@{/tariffs}">Retour</a>
+        </div>
+
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <form th:action="@{'/tariffs/' + ${tariffId}}" th:object="${form}" method="post">
+                <div th:replace="~{tariffs/fields :: fields}"></div>
+                <div class="form-actions">
+                    <button class="btn primary" type="submit">Enregistrer</button>
+                    <a class="btn" th:href="@{/tariffs}">Annuler</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+</body>
+</html>
